@@ -48,6 +48,7 @@ public class ProcessorResource {
         // if (clientId == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         // }
+
     }
 
 
