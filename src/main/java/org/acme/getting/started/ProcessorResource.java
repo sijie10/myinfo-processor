@@ -2,6 +2,7 @@ package org.acme.getting.started;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -41,14 +42,17 @@ public class ProcessorResource {
     @ConfigProperty(name = "attributes")
     private String attributes;
 
+    @Inject
+    private static Environment environment;
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/getEnv")
     public Response getEnv() {
-        // if (clientId == null) {
+         if (clientId == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
-        // }
-
+         }
+         return Response.ok(environment).build();
     }
 
 
