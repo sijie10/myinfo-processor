@@ -1,17 +1,27 @@
 package org.acme.getting.started.model;
 
+import io.vertx.core.json.Json;
+import jdk.jfr.ContentType;
 import org.acme.getting.started.proxy.TokenProxy;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.resteasy.reactive.RestForm;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.List;
 
 @Path("/")
 public class ProcessorResource {
 
+    //this gets injected after the class is instantiated by Jersey
+    @Context
+    UriInfo uriInfo;
     @RestClient
     TokenProxy tokenProxy;
     @ConfigProperty(name = "clientId")
@@ -54,17 +64,44 @@ public class ProcessorResource {
          if (clientId == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
          }
+
          return Response.ok(environment).build();
     }
 
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Path("/getPersonData")
-    public Response getPersonData(
-            @QueryParam("code") String authCode) {
-        TokenResponse tokenResponse = tokenProxy.getToken(authCode, redirectUrl, clientId, clientSecret);
-        return Response.ok(tokenResponse).build();
+    public Response getPersonData(@RestForm String code) {
+        System.out.println("Getting person data..");
+        System.out.println(code);
+//        TokenResponse tokenResponse = tokenProxy.getToken("dummyAuthCode", redirectUrl, clientId, clientSecret);
+//        return Response.ok(tokenResponse).build();
+        return Response.noContent().build();
     }
+
+    @GET
+    @Path("/callback")
+    @Produces({MediaType.TEXT_HTML})
+    public InputStream viewHome()
+    {
+        System.out.println(System.getProperty("user.dir"));
+        File f = new File(System.getProperty("user.dir") + "\\..\\src\\main\\resources\\META-INF\\resources\\index.html");
+        try {
+            return new FileInputStream(f);
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+//    @Path("/callback")
+//    @GET
+//    public Response callback(){
+//        UriBuilder addressBuilder = uriInfo.getBaseUriBuilder();
+//        addressBuilder.path("/");
+//        return Response.seeOther(addressBuilder.build()).build();
+//    }
 //
 //    private Request createTokenRequest(String authCode) {
 //        String cacheCtl = "no-cache";
